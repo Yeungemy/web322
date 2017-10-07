@@ -88,8 +88,9 @@ app.get("/departments", (req, res) => {
     });
 });
 
-app.get((req, res) => {
+app.use((req, res) => {
     res.status(404).send("Page Not Found");
-})
+});
+
 app.listen(HTTP_PORT, onHttpStart);
 // app.use(express.static('public'));
