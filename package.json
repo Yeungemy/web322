@@ -10,6 +10,7 @@
   "author": "Emy Yeung",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.4"
+    "express": "^4.15.4",
+    "promise": "^8.0.1"
   }
 }
