@@ -1,37 +1,40 @@
 <div class="row">
     <div class="col-md-12">
-        {{#each data}}
-        <h1>{{firstName}} {{last_name}} - Employee: {{employeeNum}}</h1>
+        {{#each viewData.data}}
+        <h1> {{firstName}}&nbsp;{{last_name}}&nbsp;-&nbsp;Employee:&nbsp;{{employeeNum}}</h1>
         <form method="post" action="/employee/update">
-            <input name="employeeNum" type="hidden" value="{{employeeNum}}" />
+            <input type="hidden" name="employeeNum" value="{{employeeNum}}" />
             <fieldset>
-                <legend>Personal Information</legend>
+                <legend>Personal&nbsp;Information</legend>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="firstName">First Name:</label>
-                            <input class="form-control" id="firstName" name="firstName" type="text" value="{{ firstName}}" />
+                            <label for="firstName">First&nbsp;Name:</label>
+                            <input class="form-control" id="firstName" name="firstName" type="text" value="{{firstName}}" />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="last_name">Last Name:</label>
-                            <input class="form-control" id="last_name" name="lsat_name" type="text" value="{{ last_name}}" />
+                            <label for="last_name">Last&nbsp;Name:</label>
+                            <input class="form-control" id="last_name" name="last_name" type="text" value="{{last_name}}" />
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="email">Email:</label>
-                            <input class="form-control" id="email" type="email" name="email" value="{{email}}" />
+                            <input class="form-control" id="email" name="email" type="text" value="{{email}}" />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="socialSecurityNumber">Social&nbsp;Security&nbsp;Number:</label>
-                            <input class="form-control" id="SSN" name="SSN" type="text" value="{{ SSN}}" />
+                            <label for="SSN">Social&nbsp;Security&nbsp;Num:</label>
+                            <input class="form-control" id="SSN" name="SSN" type="text" value="{{SSN}}" readonly />
                         </div>
                     </div>
-                    <div class="row">
+                </div>
+                <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="addressStreet">Address&nbsp;(Street):</label>
@@ -61,92 +64,63 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="manager">Manager:</label>
-                            {{#if isManager}}
-                            <input class="form-control" id="isManager" name="isManger" type="checkbox" checked/> {{else}}
-                            <input class="form-control" id="isManager" name="isManger" type="checkbox" /> {{/if}}
+                            <label for="isManager">Manager:</label>{{#if isManager}}
+                            <input class="form-control" type="checkbox" id="isManager" name="isManager" checked />{{else}}
+                            <input class="form-control" type="checkbox" id="isManager" name="isManager" />{{/if}}
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="employeeManagerNum">Employee's&nbsp;Manager&nbsp;Number:</label>
-                            <input class="form-control" id="employeeManagerNum" name="employeeManagerNum" type="text" value="{{ employeeManagerNum}}"
-                            />
+                            <input class="form-control" id="employeeManagerNum" name="employeeManagerNum" type="text" value="{{employeeManagerNum}}"/>
                         </div>
                     </div>
-
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="status">Status:</label>
-                            <br /> {{#equal status "Full Time"}}
+                            <label>Status:</label><br />{{#equal status "Full Time"}}
                             <label class="checkbox-inline">
-                                <input id="FT" name="status" value="Full_Time" type="radio" checked /> Full&nbsp;Time
+                                <input type="radio" id="statusFulltime" name="status" value="Full Time" checked="" /> Full&nbsp;Time
+                            </label>
+                                <label class="checkbox-inline">
+                                <input type="radio" id="statusParttime" name="status" value="Part Time"  /> Part&nbsp;Time
+                            </label>{{/equal}}{{#equal status "Part Time"}}
+                            <label class="checkbox-inline">
+                                <input type="radio" id="statusFulltime" name="status" value="Full Time"  /> Full&nbsp;Time
                             </label>
                             <label class="checkbox-inline">
-                                <input id="PT" name="status" value="Part_Time" type="radio" /> Part&nbsp;Time
-                            </label>
-                            {{/equal}} {{#equal status "Part Time"}}
+                                <input type="radio" id="statusParttime" name="status" value="Part Time" checked="" /> Part&nbsp;Time
+                            </label>{{/equal}}{{#unless status}}
                             <label class="checkbox-inline">
-                                <input id="FT" name="status" value="Full_Time" type="radio" /> Full&nbsp;Time
-                            </label>
-                            <label class="checkbox-inline">
-                                <input id="PT" name="status" value="Part_Time" type="radio" checked/> Part&nbsp;Time
-                            </label>
-                            {{/equal}} {{#unless status}}
-                            <label class="checkbox-inline">
-                                <input id="FT" name="status" value="Full_Time" type="radio" /> Full&nbsp;Time
+                                <input type="radio" id="statusFulltime" name="status" value="Full Time"  /> Full&nbsp;Time
                             </label>
                             <label class="checkbox-inline">
-                                <input id="PT" name="status" value="Part_Time" type="radio" /> Part&nbsp;Time
-                            </label>
-                            {{/unless}}
+                                <input type="radio" id="statusParttime" name="status" value="Part Time" /> Part&nbsp;Time
+                            </label>{{/unless}}
                         </div>
-                    </div>
-
+                    </div>{{/each}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="department">Department:</label>
-                            
-                            <select class="form-control" name="department" >                              
-                                {{#equal department "1"}}
-                                <option value="1">1</option>{{/equal}}
-                                {{#equal department "2"}} 
-                                <option value="2">2</option>{{/equal}}
-                                {{#equal department "3"}}
-                                <option value="3">3</option>{{/equal}}
-                                {{#equal department "4"}}
-                                <option value="4">4</option>{{/equal}}
-                                {{#equal department "5"}}
-                                <option value="5">5</option>{{/equal}}
-                                {{#equal department "6"}}
-                                <option value="6}">6</option>{{/equal}}
-                                {{#equal department "7"}}
-                                <option value="7">7</option>{{/equal}}
-                                {{#unless department}}
-                                <option value="">Not assigned to any department</option>{{/unless}}
-                                 <option value="">Choose department</option>
-                                {{#times 7}}
-                                <option value="{{this}}">{{this}}</option>{{/times}}                                
-                            </select>
+                            <label for="department">Department</label>{{#if viewData.departments}}
+                            <select class="form-control" name="department" id="department">{{#unless viewData.departments.Selected}}
+                                <option value="">Please&nbsp;Choose&nbsp;Department</option>{{/unless}}{{#each viewData.departments}}
+                                <option value="{{departmentId}}" {{#if selected}} selected {{/if}} >{{departmentName}}</option>{{/each}}
+                            </select>{{else}}
+                            <div>No&nbsp;Departments</div>{{/if}}
                         </div>
                     </div>
-
+                </div>{{#each viewData.data}}
+                <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="hireDate">Hire&nbsp;Date:</label>
-                            <input class="form-control" id="hireDate" name="hireDate" type="text" value="{{hireDate}}" readonly/>
+                            <label for="hireDate">Hire&nbsp;Date</label>
+                            <input class="form-control" id="hireDate" name="hireDate" type="text" value="{{hireDate}}" readonly />
                         </div>
                     </div>
-
                 </div>
-                {{/each}}
             </fieldset>
             <hr />
-            <input type="submit" class="btn btn-primary pull-right" value="Update Employee" />
-            <br />
-            <br />
-            <br />
-        </form>
+            <input type="submit" class="btn btn-primary pull-right" value="Update Employee" /><br /><br /><br />
+        </form>{{/each}}
     </div>
 </div>
