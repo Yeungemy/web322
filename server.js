@@ -1,10 +1,12 @@
-/********************************************************************************* * WEB322 – Assignment 02
+/********************************************************************************** 
+ * WEB322 – Assignment 06
  * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
  * of this assignment has been copied manually or electronically from any other source
  * (including 3rd party web sites) or distributed to other students. *
  * Name: Emy Yeung         Student ID: 026 302 117           Date: Oct 18, 2017 *
  * Online (Heroku) Link: https://fathomless-peak-93752.herokuapp.com/
  * ********************************************************************************/
+const dataServiceComments = require("./data-service-comments.js");
 const data_service = require('./data-service.js');
 const express = require("express");
 const app = express();
@@ -46,15 +48,15 @@ app.set('view engine', '.hbs');
 
 const HTTP_PORT = process.env.PORT || 8080;
 
+data_service.initialize().then(dataServiceComments.initialize())
+.then(() => {
+    app.listen(HTTP_PORT, onHttpStart);
+}).catch(() => {
+    console.log("Failed to initialize");
+});
+
 function onHttpStart() {
     console.log("Express http server listen on: " + HTTP_PORT);
-    return new Promise((req, res) => {
-        data_service.initialize().then((text) => {
-            console.log(text)
-        }).catch((ex) => {
-            console.log(ex);
-        });
-    });
 }
 
 app.get("/", function (req, res) {
@@ -62,7 +64,11 @@ app.get("/", function (req, res) {
 });
 
 app.get("/about", function (req, res) {
-    res.render("about");
+    dataServiceComments.getAllComments().then((data) => {
+        res.render("about", {data: data});
+    }).catch(() => {
+        res.render("about");
+    });
 });
 
 // Adding additional routes
@@ -207,21 +213,21 @@ app.get("/department/:departmentId", (req, res) => {
     });
 });
 
-// add post route
+// post routs for add or update data
 app.post("/employees/add", (req, res) => {
     data_service.addEmployee(req.body).then((data) => {
         res.redirect("/employees");
     }).catch((ex) => {
         console.log(ex);
-    })
-})
+    });
+});
 
 app.post("/employee/update", (req, res) => {
     data_service.updateEmployee(req.body).then((data) => {
         res.redirect("/employees");
     }).catch((ex) => {
         console.log(ex);
-    })
+    });
 });
 
 app.post("/departments/add", (req, res) => {
@@ -230,7 +236,7 @@ app.post("/departments/add", (req, res) => {
     }).catch((ex) => {
         console.log(ex);
     });
-})
+});
 
 // define the "/department/update" route
 app.post("/department/update", (req, res) => {
@@ -239,11 +245,49 @@ app.post("/department/update", (req, res) => {
     }).catch((ex) => {
         console.log(ex);
     });
-})
+});
+
+app.post("/about/addComment", (req, res) => {
+    dataServiceComments.addComment(req.body).then((data) => {
+        res.redirect("/about");
+    }).catch((ex) => {
+        console.log(ex);
+        res.redirect("/about");
+    });
+});
+
+app.post("/about/addReply", (req, res) => {
+    dataServiceComments.addReply(req.body).then((data) => {
+        res.redirect("/about");
+    }).catch((ex) => {
+        console.log(ex);
+        res.redirect("/about");
+    });
+});
 
 app.use((req, res) => {
     res.status(404).send("Page Not Found");
 });
 
-app.listen(HTTP_PORT, onHttpStart);
-// app.use(express.static('public'));
+// // test data-service-comments.js 
+// dataServiceComments.initialize().then(() => {
+//     dataServiceComments.addComment({
+//         authorName: "Comment 1 Author",
+//         authorEmail: "comment1@mail.com",
+//         subject: "Comment 1",
+//         commentText: "Comment Text 1"
+//     }).then((id) => {
+//         dataServiceComments.addReply({
+//             comment_id: id,
+//             authorName: "Reply 1 Author",
+//             authorEmail: "reply1@mail.com",
+//             commentText: "Reply Text 1"
+//         }).then(dataServiceComments.getAllComments).then((data) => {
+//             console.log("comment: " + data[data.length - 1]);
+//             process.exit();
+//         });
+//     });
+// }).catch((err) => {
+//     console.log("Error: " + err);
+//     process.exit();
+// });
