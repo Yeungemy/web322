@@ -34,7 +34,7 @@ module.exports.initialize = () => {
             resolve();
         });
     });
-}
+};
 
 module.exports.addComment = (data) => {
     return new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ module.exports.addComment = (data) => {
             }
         });
     });
-}
+};
 
 module.exports.getAllComments = () => {
     return new Promise((resolve, reject) => {
@@ -65,7 +65,7 @@ module.exports.getAllComments = () => {
                 reject(err);
             });
     });
-}
+};
 
 module.exports.addReply = (data) => {
     return new Promise((resolve, reject) => {
@@ -87,4 +87,4 @@ module.exports.addReply = (data) => {
                 reject(err);
             });
     });
-}
+};

@@ -55,15 +55,15 @@ var Department = sequelize.define('Department', {
 
 module.exports.initialize = () => {
     return new Promise((resolve, reject) => {
-        sequelize.sync().then( (Employee) => {
-            resolve("Initialized employees Successfully!");
-        }).then( (Department) => {
-            resolve("Initialized department Successfully!");
+        sequelize.sync().then((Employee) => {
+            resolve();
+        }).then((Department) => {
+            resolve();
         }).catch( (err) => {
-            reject("Unable to sync the database");
+            reject("Unable to synclize the database");
         });
     });
-}
+};
 
 module.exports.getAllEmployees = () => {
     return new Promise((resolve, reject) => {
@@ -73,7 +73,7 @@ module.exports.getAllEmployees = () => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getEmployeesByStatus = (status) => {
     return new Promise((resolve, reject) => {
@@ -85,7 +85,7 @@ module.exports.getEmployeesByStatus = (status) => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getEmployeesByDepartment = (department) => {
     return new Promise((resolve, reject) => {
@@ -97,7 +97,7 @@ module.exports.getEmployeesByDepartment = (department) => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getEmployeesByManager = (manager) => {
     return new Promise((resolve, reject) => {
@@ -109,7 +109,7 @@ module.exports.getEmployeesByManager = (manager) => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getEmployeeByNum = (num) => {
     return new Promise((resolve, reject) => {
@@ -121,7 +121,7 @@ module.exports.getEmployeeByNum = (num) => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getManagers = () => {
     return new Promise((resolve, reject) => {
@@ -133,7 +133,7 @@ module.exports.getManagers = () => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.getDepartments = () => {
     return new Promise((resolve, reject) => {
@@ -143,7 +143,7 @@ module.exports.getDepartments = () => {
             reject("No results returned.")
          }); 
     });
-}
+};
 
 module.exports.addEmployee = (employeeData) => {
     employeeData.isManager = (employeeData.isManager)? true : false;
@@ -171,13 +171,13 @@ module.exports.addEmployee = (employeeData) => {
         }).then(()=>{
             resolve();
          }).catch(()=>{
-            reject("Unable to update employee")
-         })
+            reject("Unable to update employee");
+         });
     });
-}
+};
 
 module.exports.updateEmployee = (employeeData) => {   
-    employeeData.isManager = (employeeData.isManager)? true : false;
+    employeeData.isManager = (employeeData.isManager) ? true : false;
     return new Promise((resolve, reject) => { 
             for(var i in employeeData) {
                 if(employeeData[i] == "") {
@@ -202,10 +202,10 @@ module.exports.updateEmployee = (employeeData) => {
              }).then(()=>{
                 resolve();
              }).catch(()=>{
-                reject("Unable to add a new employee!!!")
-             })
+                reject("Unable to add a new employee!!!");
+             });
     });
-}
+};
 
 module.exports.addDepartment = (departmentData) => {   
     return new Promise((resolve, reject) => {
@@ -215,10 +215,10 @@ module.exports.addDepartment = (departmentData) => {
         }).then(()=>{
             resolve();
          }).catch(()=>{
-            reject("Unable to create a new department!!!")
-         })
+            reject("Unable to create a new department!!!");
+         });
     });
-}
+};
 
 module.exports.updateDepartment = (departmentData) => {
     return new Promise((resolve, reject) => {
@@ -240,7 +240,7 @@ module.exports.updateDepartment = (departmentData) => {
                 reject("unable to update department");
             });
     });
-}
+};
 
 module.exports.getDepartmentById = (id) => {
     return new Promise((resolve, reject) => {
@@ -252,7 +252,7 @@ module.exports.getDepartmentById = (id) => {
             reject("No results returned");
         });
     });
-}
+};
 
 module.exports.deleteEmployeeByNum = (empNum) =>{
     return new Promise((resolve, reject) => {
@@ -261,7 +261,7 @@ module.exports.deleteEmployeeByNum = (empNum) =>{
         }).then((employee) => {
                 resolve(employee);
         }).catch((err) => {
-                reject("Fail to remove that employeeNum")
+                reject("Fail to remove that employeeNum");
         });
     });
-}
+};

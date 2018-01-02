@@ -1,11 +1,13 @@
 /********************************************************************************** 
- * WEB322 – Assignment 06
+ * WEB322 – Assignment 07
  * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
  * of this assignment has been copied manually or electronically from any other source
  * (including 3rd party web sites) or distributed to other students. *
- * Name: Emy Yeung         Student ID: 026 302 117           Date: Oct 18, 2017 *
+ * Name: Emy Yeung         Student ID: 026 302 117           Date: DEC 24, 2017 *
  * Online (Heroku) Link: https://fathomless-peak-93752.herokuapp.com/
  * ********************************************************************************/
+const dataServiceAuth = require('./data-service-auth.js');
+const clientSessions = require('client-sessions');
 const dataServiceComments = require("./data-service-comments.js");
 const data_service = require('./data-service.js');
 const express = require("express");
@@ -13,6 +15,29 @@ const app = express();
 const path = require("path");
 const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
+
+app.use(clientSessions({
+    cookieName: "session", // this is the object name that will be added to 'req'
+    secret: "web322_A7", // this should be a long un-guessable string.
+    duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
+    activeDuration: 1000 * 60 // the session will be extended by this many ms each request (1 minute)
+}));
+
+// // ensure that all of templates will have access to a "session" object
+// app.use((req, res, next) => {
+//     req.locals.session = req.session;
+//     next();
+// });
+
+// checks if a user is logged in
+function ensureLogin(req, res, next) {
+    if (!req.session.user) {
+        res.redirect("/login");
+    } else {
+        next();
+    }
+}
+
 app.set('view engine', 'html');
 app.use(express.static('public'));
 
@@ -27,9 +52,9 @@ app.engine(".hbs", exphbs({
         equal: function (lvalue, rvalue, options) {
             if (arguments.length < 3)
                 throw new Error("Handlebars Helper equal needs 2 parameters");
-            if (lvalue != rvalue) 
+            if (lvalue != rvalue)
                 return options.inverse(this);
-            else 
+            else
                 return options.fn(this);
         },
 
@@ -49,35 +74,53 @@ app.set('view engine', '.hbs');
 const HTTP_PORT = process.env.PORT || 8080;
 
 data_service.initialize().then(dataServiceComments.initialize())
-.then(() => {
-    app.listen(HTTP_PORT, onHttpStart);
-}).catch(() => {
-    console.log("Failed to initialize");
-});
+    .then(dataServiceAuth.initialize())
+    .then(() => {
+        app.listen(HTTP_PORT, onHttpStart);
+    }).catch((err) => {
+        console.log("unable to start the server: " + err);
+    });
 
 function onHttpStart() {
     console.log("Express http server listen on: " + HTTP_PORT);
 }
 
+// setup routes
+app.get("/login", (req, res) => {
+    res.render("login");
+});
+
+app.get("/register", (req, res) => {
+    res.render("register");
+});
+
+app.get("/logout", (req, res) => {
+    req.session.reset();
+    res.redirect("/");
+});
+
 app.get("/", function (req, res) {
-    res.render("home");
+    res.render("home", {user: req.session.user});
 });
 
 app.get("/about", function (req, res) {
     dataServiceComments.getAllComments().then((data) => {
-        res.render("about", {data: data});
+        res.render("about", {
+            data: data, user: req.session.user
+        });
     }).catch(() => {
         res.render("about");
     });
 });
 
 // Adding additional routes
-app.get("/employees", (req, res) => {
+app.get("/employees", ensureLogin, (req, res) => {
     if (req.query.status) {
         data_service.getEmployeesByStatus(req.query.status).then((data) => {
             res.render("employeeList", {
                 data: data,
-                title: "Employees"
+                title: "Employees",
+                user: req.session.user
             });
         }).catch((ex) => {
             res.render("employeeList", {
@@ -89,7 +132,8 @@ app.get("/employees", (req, res) => {
         data_service.getEmployeesByDepartment(req.query.department).then((data) => {
             res.render("employeeList", {
                 data: data,
-                title: "Employees"
+                title: "Employees",
+                user: req.session.user
             });
         }).catch((ex) => {
             res.render("employeeList", {
@@ -101,7 +145,8 @@ app.get("/employees", (req, res) => {
         data_service.getEmployeesByManager(req.query.manager).then((data) => {
             res.render("employeeList", {
                 data: data,
-                title: "Employees"
+                title: "Employees",
+                user: req.session.user
             });
         }).catch((ex) => {
             res.render("employeeList", {
@@ -113,7 +158,8 @@ app.get("/employees", (req, res) => {
         data_service.getAllEmployees().then((data) => {
             res.render("employeeList", {
                 data: data,
-                title: "Employees"
+                title: "Employees",
+                user: req.session.user
             });
         }).catch((ex) => {
             res.render("employeeList", {
@@ -124,7 +170,7 @@ app.get("/employees", (req, res) => {
     }
 });
 
-app.get("/employee/:empNum", (req, res) => {
+app.get("/employee/:empNum", ensureLogin, (req, res) => {
     // initialize an empty object to store the values 
     let viewData = {};
     data_service.getEmployeeByNum(req.params.empNum).then((data) => {
@@ -146,17 +192,21 @@ app.get("/employee/:empNum", (req, res) => {
         if (viewData.data == null) { // if no employee - return an error
             res.status(404).send("Employee Not Found");
         } else {
-            res.render("employee", { viewData: viewData }); // render the "employee" view 
+            res.render("employee", {
+                viewData: viewData,
+                user: req.session.user
+            }); // render the "employee" view 
         }
     });
 });
 
 
-app.get("/managers", (req, res) => {
+app.get("/managers", ensureLogin, (req, res) => {
     data_service.getManagers().then((data) => {
         res.render("employeeList", {
             data: data,
-            title: "Employees (Managers)"
+            title: "Employees (Managers)",
+            user: req.session.user
         });
     }).catch((ex) => {
         res.render("employeeList", {
@@ -166,11 +216,12 @@ app.get("/managers", (req, res) => {
     });
 });
 
-app.get("/departments", (req, res) => {
+app.get("/departments", ensureLogin, (req, res) => {
     data_service.getDepartments().then((data) => {
         res.render("departmentList", {
             data: data,
-            title: "Departments"
+            title: "Departments",
+            user: req.session.user
         });
     }).catch((ex) => {
         res.render("departmentList", {
@@ -180,10 +231,11 @@ app.get("/departments", (req, res) => {
     });
 });
 
-app.get("/employees/add", (req, res) => {
+app.get("/employees/add", ensureLogin, (req, res) => {
     data_service.getDepartments().then((data) => {
         res.render("addEmployee", {
-            departments: data
+            departments: data,
+            user: req.session.user
         });
     }).catch((ex) => {
         console.log(ex);
@@ -193,11 +245,14 @@ app.get("/employees/add", (req, res) => {
     });
 });
 
-app.get("/departments/add", (req, res) => {
-    res.render("addDepartment", {title: "Department"});
+app.get("/departments/add", ensureLogin, (req, res) => {
+    res.render("addDepartment", {
+        title: "Department",
+        user: req.session.user
+    });
 });
 
-app.get("/employee/delete/:empNum", (req, res) => {
+app.get("/employee/delete/:empNum", ensureLogin, (req, res) => {
     data_service.deleteEmployeeByNum(req.params.empNum).then((data) => {
         res.redirect("/employees");
     }).catch((err) => {
@@ -205,16 +260,37 @@ app.get("/employee/delete/:empNum", (req, res) => {
     });
 });
 
-app.get("/department/:departmentId", (req, res) => {
+app.get("/department/:departmentId", ensureLogin, (req, res) => {
     data_service.getDepartmentById(req.params.departmentId).then((data) => {
         res.render("department", {
-            data: data
+            data: data,
+            user: req.session.user
         });
     });
 });
 
-// post routs for add or update data
-app.post("/employees/add", (req, res) => {
+// post routes for add or update data
+app.post("/register", (req, res) => {
+    dataServiceAuth.registerUser(req.body).then(() => {
+        res.render("register", {successMessage: "User created"});
+    }).catch((ex) => {
+        res.render("register", {errorMessage: errorMessage, user: req.body.user});
+    });
+});
+
+app.post("/login", (req, res) => {
+    dataServiceAuth.checkUser(req.body).then(() => {
+        const username = req.body.user;
+        req.session.user = {
+            username: username
+        };
+        res.redirect("/employees");
+    }).catch((err) => {
+        res.render("login", {errorMessage: err, user: req.body.user});
+    });
+});
+
+app.post("/employees/add", ensureLogin, (req, res) => {
     data_service.addEmployee(req.body).then((data) => {
         res.redirect("/employees");
     }).catch((ex) => {
@@ -222,7 +298,7 @@ app.post("/employees/add", (req, res) => {
     });
 });
 
-app.post("/employee/update", (req, res) => {
+app.post("/employee/update", ensureLogin, (req, res) => {
     data_service.updateEmployee(req.body).then((data) => {
         res.redirect("/employees");
     }).catch((ex) => {
@@ -230,7 +306,7 @@ app.post("/employee/update", (req, res) => {
     });
 });
 
-app.post("/departments/add", (req, res) => {
+app.post("/departments/add", ensureLogin, (req, res) => {
     data_service.addDepartment(req.body).then((data) => {
         res.redirect("/departments");
     }).catch((ex) => {
@@ -239,7 +315,7 @@ app.post("/departments/add", (req, res) => {
 });
 
 // define the "/department/update" route
-app.post("/department/update", (req, res) => {
+app.post("/department/update", ensureLogin, (req, res) => {
     data_service.updateDepartment(req.body).then((data) => {
         res.redirect("/departments");
     }).catch((ex) => {
@@ -268,26 +344,3 @@ app.post("/about/addReply", (req, res) => {
 app.use((req, res) => {
     res.status(404).send("Page Not Found");
 });
-
-// // test data-service-comments.js 
-// dataServiceComments.initialize().then(() => {
-//     dataServiceComments.addComment({
-//         authorName: "Comment 1 Author",
-//         authorEmail: "comment1@mail.com",
-//         subject: "Comment 1",
-//         commentText: "Comment Text 1"
-//     }).then((id) => {
-//         dataServiceComments.addReply({
-//             comment_id: id,
-//             authorName: "Reply 1 Author",
-//             authorEmail: "reply1@mail.com",
-//             commentText: "Reply Text 1"
-//         }).then(dataServiceComments.getAllComments).then((data) => {
-//             console.log("comment: " + data[data.length - 1]);
-//             process.exit();
-//         });
-//     });
-// }).catch((err) => {
-//     console.log("Error: " + err);
-//     process.exit();
-// });

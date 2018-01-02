@@ -61,3 +61,7 @@ body{
  .well.well {
      background-color: white;
  }
+
+ .login-btn{
+    width: 65px;
+ }

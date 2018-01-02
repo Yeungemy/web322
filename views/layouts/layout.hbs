@@ -17,7 +17,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1>myApp</h1>
+                    <h1>myApp {{#if user.username}}
+                        <span class="pull-right">
+                            <a href="/logout" class="btn btn-primary">&nbsp;&nbsp;&nbsp;Log Out: {{user.username}}&nbsp;&nbsp;&nbsp;</a>
+                        </span>
+                        {{else}}
+                        <span class="pull-right">
+                            <a class="btn btn-success login-btn" href="/login">Login</a>
+                            <a class="btn btn-primary" href="/register">Register</a>
+                        </span>
+                        {{/if}}
+                    </h1>
                 </div>
             </div>
         </div>
@@ -34,6 +44,7 @@
                             <a href="/about"> About </a>
                         </li>
                     </ul>
+                    {{#if user.username}}
                     <ul class="pull-right">
                         <li>
                             <a href="/employees"> All Employees </a>
@@ -45,6 +56,7 @@
                             <a href="/departments"> Departments </a>
                         </li>
                     </ul>
+                    {{/if}}
                 </div>
             </div>
         </div>
